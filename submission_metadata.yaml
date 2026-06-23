@@ -11,7 +11,7 @@ team_members:
     email: "vabs1002@gmail.com"
     role: "ML & Backend Engineer"
 
-github_repo: "https://github.com/Vabs1002/AimsDiwaliTask"
+github_repo: "https://github.com/Vabs1002/redrobai-hackathon-Protienbar"
 sandbox_link: "https://colab.research.google.com/drive/1-T7K5t_F5Uu4k0nEa92u8D3v1L-Example"
 
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
