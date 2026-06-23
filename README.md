@@ -1,60 +1,102 @@
-# Intelligent Candidate Discovery & Ranking (Agentic RAG)
+# Intelligent Candidate Discovery and Ranking
 
-An advanced candidate ranking pipeline built to discover the top 100 candidates for the Senior AI Engineer role at Redrob from a pool of 100,000 profiles. The system is designed to run 100% offline, satisfies all sandbox constraints (finishes in under 5 seconds on CPU), and incorporates verification agents to eliminate honeypot profile traps.
+Team Protienbar -- Redrob AI Hackathon Submission
 
----
 
-## Technical Highlights
+## The Problem
 
-### 1. Agentic RAG Architecture
-Instead of a simple flat vector search, our approach mimics a human recruiting team by splitting candidate scoring into specialized axes:
-* **The JD Analyzer Agent (Offline)**: Parses the job description to extract target job titles, target skills (Pinecone, Milvus, NDCG evaluation, Python), and disqualifying criteria (consulting consultancies, junior LangChain-only developers).
-* **Heuristic Pruning & Pre-filtering**: Filters out generic non-technical candidates (e.g. HR, marketing, sales) and candidates without any AI/ML background before vector search.
-* **Recruiter Committee Scoring (Online)**:
-  * **Skills Specialist**: Scores candidates based on matching skills, weighted by proficiency, tenure duration, and peer endorsements.
-  * **Career Specialist**: Screens career histories. Disqualifies service-firm-only consultancies (TCS, Wipro, Infosys, etc.) while allowing current service-firm employees who have prior product-company experience. Applies penalties for high job-switching frequencies ("title-chasers").
-  * **Logistics Specialist**: Ranks candidates based on Noida/Pune location alignment and notice periods (favoring < 30 days).
-  * **Availability Specialist**: Multiplies final match scores by real-time platform signals (recruiter response rate, signup and activity recency, and interview attendance).
+Redrob gave us a pool of 100,000 candidate profiles and one job description for a Senior AI Engineer role. The task was straightforward on paper but tricky in practice: rank the top 100 candidates who are the best fit for this role, and for each one, write a short reasoning explaining why they belong at that rank.
 
-### 2. The Honeypot Shield (Verification Agent)
-The dataset contains ~80 fake profiles with impossible data (e.g. 8 years experience at a 3-year-old company or expert skill levels with 0 months used) designed to trap basic keyword embedding search engines. Our verification agent checks every candidate profile for:
-* **Temporal Contradictions**: Checks if start dates exceed end dates, or if the claimed `duration_months` exceeds the actual calendar date difference.
-* **Skill Duration Anomaly**: Checks if candidates claim expert/advanced skills but have 0 months of usage.
-* **Metadata Integrity**: Checks if signup dates occur after last active dates.
-If any test fails, the candidate's score is immediately set to 0.0, ensuring they are completely filtered out of our top-100 shortlist.
+The catch? The ranking script has to run on a plain CPU machine with 16 GB of RAM, no GPU, no internet access, and finish in under 5 minutes. You cannot call OpenAI, Claude, or any hosted LLM during the ranking step. On top of that, the dataset is seeded with around 80 honeypot profiles -- fake candidates with subtly impossible career histories designed to trap systems that rely purely on keyword matching.
 
-### 3. Sandbox-Safe Execution (Zero Network / Under 5 Seconds)
-To meet the strict sandbox requirements (CPU-only, no network, under 5 minutes):
-* **Phase 1: Pre-computation**: Candidate profiles are encoded and compared against the target JD embedding using all-MiniLM-L6-v2. The resulting semantic scores are cached locally in `similarity_scores.json`.
-* **Phase 2: Reproduction (rank.py)**: Loads candidate data, joins it with our cached similarity scores, runs honeypot checks, executes the scoring committee formulas, and writes the output. Since it does not load PyTorch or the internet, it runs in **under 5 seconds** on a single CPU core.
+So the challenge was really about building something that actually reads and understands profiles rather than just matching buzzwords.
 
----
 
-## File Structure
+## How We Approached It
 
-* `rank.py`: The sandbox entrypoint script.
-* `precompute.py`: Script used to pre-compute embeddings offline.
-* `backend/app/honeypot.py`: Validation checks for date anomalies and fake expert profiles.
-* `backend/app/scorers.py`: Scoring formulas for skills, career quality, logistics, and response rates.
-* `similarity_scores.json`: Cached precomputed candidate embedding similarities.
-* `submission_metadata.yaml`: Hackathon submission descriptor.
-* `requirements.txt`: Package file (pure Python standard library used for ranking).
+We thought about this the way a real recruiting team would work. When a recruiter evaluates a candidate, they do not just ctrl-F for "Pinecone" or "FAISS" in the resume. They look at career trajectory, whether the person has actually shipped something, how long they stayed at each job, whether they are even actively looking, and whether the profile makes logical sense. We tried to encode that intuition into code.
 
----
+Our system has two phases.
 
-## Setup and Reproduction
+Phase 1 is a pre-computation step that runs offline with internet and GPU access (before the sandbox). We use the all-MiniLM-L6-v2 sentence transformer model to encode every candidate profile into a vector and compare it against a representation of the job description. But we do not embed all 100,000 candidates blindly. We first filter out profiles that clearly have nothing to do with AI or ML (marketing managers, HR leads, graphic designers) so we only spend compute on relevant candidates. The resulting similarity scores get saved into a JSON file that ships with the repository.
 
-### Prerequisites
-The ranking script is written in pure Python and requires no external third-party dependencies to run. It executes instantly using Python's standard libraries.
+Phase 2 is the actual ranking script, rank.py. This is the part that runs inside the sandbox. It loads the candidate data, joins it with the pre-computed similarity scores, runs a battery of checks and scoring formulas, and writes out the final CSV. Because it does not load any ML model or make any network call, it finishes in about 3 seconds on a single CPU core.
 
-### Command to Run
-Run the ranking script on the candidates file:
-```bash
-python rank.py --candidates ./candidates.jsonl --out ./submission.csv
-```
 
-### Validator Command
-Verify the format of the output CSV using the official validator:
-```bash
-python validate_submission.py submission.csv
-```
+## The Scoring Pipeline
+
+The scoring works across multiple axes, each designed to capture a different dimension of candidate quality.
+
+Semantic Similarity: This is the baseline signal from Phase 1. It tells us how close the candidate's overall profile text is to what the JD is asking for. But we do not rely on this alone -- that is exactly the trap the dataset is designed to exploit.
+
+Skills Match: We check each candidate's listed skills against the core skills the JD calls for (things like vector databases, embeddings, Python, ranking evaluation metrics). We weight each match by how long they have used the skill and how many endorsements they have. An expert-level Pinecone user with 36 months of experience scores higher than someone who lists it with beginner proficiency and 2 months.
+
+Career Quality: This is where we filter out service-firm-only careers. The JD explicitly says candidates whose entire career has been at TCS, Infosys, Wipro, Accenture, Cognizant, or Capgemini are not a good fit. We enforce this, but we are careful about it: if someone is currently at a consulting firm but has prior experience at a product company, they stay in the running. We also penalize heavy job-hoppers (people who switch every 12-18 months chasing titles) because the JD specifically calls that out as a disqualifier.
+
+Experience Fit: The JD targets 5 to 9 years of experience. We give the highest scores to candidates in that sweet spot and apply a gentle decay for people outside the range.
+
+Logistics: Candidates located in Noida or Pune (where Redrob has offices) get a boost. Candidates with a notice period under 30 days get a boost. These are real-world hiring signals that matter.
+
+Platform Activity: This is the behavioral signal layer. We look at the Redrob platform signals -- recruiter response rate, last login date, interview completion rate, profile completeness. A candidate who looks perfect on paper but has not logged in for 6 months and responds to 5 percent of recruiter messages is, for practical hiring purposes, not actually available. We down-weight them accordingly.
+
+All of these axes get combined into a single composite score. The final ranking is sorted by score descending, with ties broken alphabetically by candidate ID.
+
+
+## Honeypot Detection
+
+The dataset contains roughly 80 fake profiles designed to look attractive to keyword-matching systems but with logically impossible career data. For example, a candidate might claim 8 years of experience at a company that was founded 3 years ago, or list expert proficiency in 10 skills but with 0 months of usage for each one.
+
+We built a verification layer (we call it the Honeypot Shield) that checks every candidate for:
+
+- Timeline contradictions: Does the claimed duration at a job exceed what the calendar allows between the start and end dates?
+- Skill duration anomalies: Does the candidate claim expert or advanced proficiency in a skill but report 0 months of actual usage?
+- Date integrity: Does the signup date come after the last active date, which would be physically impossible?
+
+Any candidate that fails these checks gets their score set to zero, which guarantees they never enter the top 100.
+
+
+## The Reasoning Column
+
+For each of the top 100 candidates, we generate a 1-2 sentence reasoning that references specific facts from their profile -- their current title, years of experience, key skills, career history, and any concerns. We made sure these are not templated or copy-pasted. Each reasoning is unique and reflects what actually makes that particular candidate a good (or decent) fit at their specific rank position.
+
+
+## Repository Structure
+
+    rank.py                    -- The sandbox entrypoint. Produces submission.csv from candidates.jsonl.
+    precompute.py              -- Offline script that generates similarity_scores.json using sentence embeddings.
+    backend/app/honeypot.py    -- Honeypot detection rules (timeline checks, skill anomaly checks).
+    backend/app/scorers.py     -- Scoring formulas for skills, career quality, logistics, and platform activity.
+    similarity_scores.json     -- Pre-computed embedding similarity database (about 2 MB).
+    submission.csv             -- Our final validated top-100 ranking.
+    submission_metadata.yaml   -- Hackathon metadata descriptor.
+    sandbox_demo.ipynb         -- Google Colab notebook for sandbox reproducibility demo.
+    requirements.txt           -- Dependencies (the ranking step uses only Python standard library).
+
+
+## How to Reproduce
+
+The ranking script uses only Python standard library modules. No pip install needed for the ranking step itself.
+
+To generate the submission CSV:
+
+    python rank.py --candidates ./candidates.jsonl --out ./submission.csv
+
+To validate the output format:
+
+    python validate_submission.py submission.csv
+
+The pre-computation step (generating embeddings) requires torch and sentence-transformers. This step is already done and the results are included in similarity_scores.json, so you do not need to re-run it to reproduce the submission. If you want to re-run it anyway:
+
+    pip install torch sentence-transformers
+    python precompute.py
+
+
+## Compute Environment
+
+    Machine: Local PC, Windows 11
+    CPU: 8 cores
+    RAM: 16 GB
+    Python: 3.12
+    GPU: Not used during ranking
+    Network: Not used during ranking
+    Ranking runtime: approximately 3 seconds
