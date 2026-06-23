@@ -1,0 +1,15 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large files and zip archives
+\[PUB\] India_runs_data_and_ai_challenge.zip
+\[PUB\] India_runs_data_and_ai_challenge/
+__MACOSX/
+
+# Temporary and test candidate datasets
+test_candidates.jsonl
+test_submission.csv
+sandbox_candidates.jsonl
+sandbox_submission.csv

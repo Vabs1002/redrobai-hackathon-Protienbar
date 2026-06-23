@@ -1,0 +1,8 @@
+# Antigravity Candidate Ranker Requirements
+# The main ranking script (rank.py) runs on pure Python standard library.
+# Zero external packages are required to run the evaluation step!
+
+# Development and Pre-computation requirements only:
+numpy>=2.1.3
+sentence-transformers>=5.4.0
+tqdm>=4.67.3
