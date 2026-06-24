@@ -38,15 +38,19 @@ Agentic Design: Instead of using a single hardcoded scoring formula, we split th
 
 ## Our Key Novelties
 
-We designed our system with four specific innovations that give it an edge over standard keyword and embedding approaches:
+We designed our system with six specific innovations that give it an edge over standard keyword and embedding approaches:
 
-1. Agentic RAG Architecture: Rather than relying on simple semantic similarity matching, our system implements an Agentic Retrieval-Augmented Generation model. It retrieves candidates using hybrid dense vector search, augments the data through a modular committee of recruiting specialists that verify and score profiles across independent axes, and generates detailed, factual recruiter reasonings for the final shortlist.
+1. Three-Second Execution Speed: We split the ranking process into offline embedding pre-computation and online rule scoring. This allows the sandbox execution script (rank.py) to run completely offline on a single CPU core in under 3 seconds for all 100,000 candidates, easily satisfying the 5-minute sandbox limit without crashing.
 
-2. Dynamic Service Company Detection: Instead of only checking for a hardcoded list of consulting companies, our system inspects the industry field of every job in a candidate's history. If a company is classified under IT services, information technology and services, or management consulting, our system automatically detects it. This captures smaller or unlisted service firms that other systems miss.
+2. Agentic RAG Architecture: Rather than relying on simple semantic similarity matching, our system implements an Agentic Retrieval-Augmented Generation model. It retrieves candidates using hybrid dense vector search, augments the data through a modular committee of recruiting specialists that verify and score profiles across independent axes, and generates detailed, factual recruiter reasonings for the final shortlist.
 
-3. Availability and Hireability Scaling: A candidate with a perfect resume is useless if they are unreachable. We use real-time platform signals (response rates, last active dates, notice periods) to scale the final matching score. This prioritizes responsive, active candidates who are ready to start, rather than just theoretically qualified profiles.
+3. Dynamic Service Company Detection: Instead of only checking for a hardcoded list of consulting companies, our system inspects the industry field of every job in a candidate's history. If a company is classified under IT services, information technology and services, or management consulting, our system automatically detects it. This captures smaller or unlisted service firms that other systems miss.
 
-4. Automated Honeypot Auditing: We built a lightweight validation layer that catches impossible dates and fake skill claims before ranking them. Because this uses fast chronological logic, it achieves a zero percent honeypot rate in our final top 100 without consuming expensive CPU time.
+4. Availability and Hireability Scaling: A candidate with a perfect resume is useless if they are unreachable. We use real-time platform signals (response rates, last active dates, notice periods) to scale the final matching score. This prioritizes responsive, active candidates who are ready to start, rather than just theoretically qualified profiles.
+
+5. Automated Honeypot Auditing: We built a lightweight validation layer that catches impossible dates and fake skill claims before ranking them. Because this uses fast chronological logic, it achieves a zero percent honeypot rate in our final top 100 without consuming expensive CPU time.
+
+6. Non-Hallucinatory Reasonings: Unlike systems that call LLMs during ranking (which are prone to hallucinating candidate skills and formatting errors), our reasoning engine uses strict metadata extraction to compile highly factual, profile-consistent recruiter sentences.
 
 
 ## The Scoring Pipeline
