@@ -27,7 +27,7 @@ Phase 2 is the actual ranking script, rank.py. This is the part that runs inside
 
 Even though this is not a conversational chatbot, our architecture is built directly on Retrieval-Augmented Generation (RAG) and agentic principles.
 
-Retrieval: We perform semantic retrieval across the database of 100,000 candidate profiles using dense vector search (sentence transformer embeddings) combined with metadata-driven pre-filtering.
+Retrieval: We perform hybrid retrieval across the database of 100,000 candidate profiles, combining dense vector search (sentence transformer embeddings) with keyword matching and metadata-driven pre-filtering.
 
 Augmentation: We augment the semantic vector similarity results by overlaying structured candidate metadata, career histories, and real-time behavioral signals (such as notice periods and platform activity levels).
 
