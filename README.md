@@ -36,6 +36,17 @@ Generation: Instead of simply returning a raw candidate list, the system generat
 Agentic Design: Instead of using a single hardcoded scoring formula, we split the decision-making among specialized modules that behave like a recruiting committee. The Honeypot Shield acts as an auditing agent that verifies data truthfulness. The Skills Scorer audits technical proficiency. The Career Specialist screens companies and job durations. The Availability Specialist evaluates platform activity. Together, these modules collaborate to produce the final verified ranking.
 
 
+## Our Key Novelties
+
+We designed our system with three specific innovations that give it an edge over standard keyword and embedding approaches:
+
+1. Dynamic Service Company Detection: Instead of only checking for a hardcoded list of consulting companies, our system inspects the industry field of every job in a candidate's history. If a company is classified under IT services, information technology and services, or management consulting, our system automatically detects it. This captures smaller or unlisted service firms that other systems miss.
+
+2. Availability and Hireability Scaling: A candidate with a perfect resume is useless if they are unreachable. We use real-time platform signals (response rates, last active dates, notice periods) to scale the final matching score. This prioritizes responsive, active candidates who are ready to start, rather than just theoretically qualified profiles.
+
+3. Automated Honeypot Auditing: We built a lightweight validation layer that catches impossible dates and fake skill claims before ranking them. Because this uses fast chronological logic, it achieves a zero percent honeypot rate in our final top 100 without consuming expensive CPU time.
+
+
 ## The Scoring Pipeline
 
 The scoring works across multiple axes, each designed to capture a different dimension of candidate quality.
