@@ -23,6 +23,19 @@ Phase 1 is a pre-computation step that runs offline with internet and GPU access
 Phase 2 is the actual ranking script, rank.py. This is the part that runs inside the sandbox. It loads the candidate data, joins it with the pre-computed similarity scores, runs a battery of checks and scoring formulas, and writes out the final CSV. Because it does not load any ML model or make any network call, it finishes in about 3 seconds on a single CPU core.
 
 
+## How It Relates to Agentic RAG
+
+Even though this is not a conversational chatbot, our architecture is built directly on Retrieval-Augmented Generation (RAG) and agentic principles.
+
+Retrieval: We perform semantic retrieval across the database of 100,000 candidate profiles using dense vector search (sentence transformer embeddings) combined with metadata-driven pre-filtering.
+
+Augmentation: We augment the semantic vector similarity results by overlaying structured candidate metadata, career histories, and real-time behavioral signals (such as notice periods and platform activity levels).
+
+Generation: Instead of simply returning a raw candidate list, the system generates a 1-2 sentence recruiter reasoning for each candidate in the final shortlist, custom-tailored to their specific profile details and fit for the role.
+
+Agentic Design: Instead of using a single hardcoded scoring formula, we split the decision-making among specialized modules that behave like a recruiting committee. The Honeypot Shield acts as an auditing agent that verifies data truthfulness. The Skills Scorer audits technical proficiency. The Career Specialist screens companies and job durations. The Availability Specialist evaluates platform activity. Together, these modules collaborate to produce the final verified ranking.
+
+
 ## The Scoring Pipeline
 
 The scoring works across multiple axes, each designed to capture a different dimension of candidate quality.
