@@ -1,0 +1,466 @@
+/* =========================================================================
+   DESIGN TOKENS
+   AI Candidate Discovery & Ranking — internal HR analytics instrument.
+   Palette: near-black ink base, single gold "signal" accent reserved for
+   rank/priority, teal for qualified/positive, red for risk/rejected.
+   Display face: Space Grotesk (geometric, technical).
+   Body face: Inter. Data/mono face: JetBrains Mono (scores, IDs, ranks).
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:           #0B0D12;
+  --panel:        #14171F;
+  --panel-alt:    #181B24;
+  --border:       #242833;
+  --border-soft:  #1C1F29;
+
+  --text-primary:   #EAEBF0;
+  --text-secondary: #8B90A0;
+  --text-muted:     #5C6072;
+
+  --gold:         #C9A227;
+  --gold-soft:    rgba(201,162,39,0.14);
+  --teal:         #3DDC97;
+  --teal-soft:    rgba(61,221,151,0.12);
+  --red:          #E2574C;
+  --red-soft:     rgba(226,87,76,0.12);
+  --blue:         #6E8CC9;
+  --blue-soft:    rgba(110,140,201,0.12);
+
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body:    'Inter', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+}
+
+/* =========================================================================
+   BASE / APP SHELL
+   ========================================================================= */
+
+.stApp{
+  background: var(--bg);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+}
+
+[data-testid="stHeader"]{
+  background: transparent;
+}
+
+[data-testid="stSidebar"]{
+  background: var(--panel);
+  border-right: 1px solid var(--border-soft);
+}
+
+[data-testid="stSidebar"] *{
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5{
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+p, span, label, div{
+  color: var(--text-primary);
+}
+
+hr{
+  border-color: var(--border-soft);
+}
+
+/* tone down default streamlit metric widget so custom cards feel native */
+[data-testid="stMetricValue"]{
+  font-family: var(--font-mono);
+}
+
+/* =========================================================================
+   ATOMIC LAYOUT HELPERS
+   ========================================================================= */
+
+.section-block{
+  margin: 0.4rem 0 1.6rem 0;
+}
+
+.eyebrow{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.3rem;
+}
+
+.section-title{
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.section-subtitle{
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.divider-line{
+  height: 1px;
+  background: var(--border-soft);
+  margin: 1.1rem 0 1.4rem 0;
+  border: none;
+}
+
+/* =========================================================================
+   METRIC / KPI CARD
+   ========================================================================= */
+
+.metric-card{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem 1.25rem;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-card::before{
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--metric-accent, var(--gold));
+  opacity: 0.85;
+}
+
+.metric-label{
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 0.55rem;
+}
+
+.metric-value{
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.metric-delta{
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.metric-delta.up{ color: var(--teal); }
+.metric-delta.down{ color: var(--red); }
+.metric-delta.neutral{ color: var(--text-secondary); }
+
+/* =========================================================================
+   FEATURE CARD (Home)
+   ========================================================================= */
+
+.feature-card{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem 1.4rem;
+  height: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.feature-card:hover{
+  border-color: var(--gold);
+}
+
+.feature-icon{
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: var(--gold-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  margin-bottom: 0.9rem;
+}
+
+.feature-title{
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+
+.feature-desc{
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* =========================================================================
+   CHART CARD WRAPPER
+   ========================================================================= */
+
+.chart-card{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.2rem 0.4rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.chart-card-title{
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.15rem;
+}
+
+.chart-card-subtitle{
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+/* =========================================================================
+   INFO BOX
+   ========================================================================= */
+
+.info-box{
+  border-radius: var(--radius-sm);
+  padding: 0.85rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  margin-bottom: 0.9rem;
+}
+
+.info-box.info{
+  background: var(--blue-soft);
+  border-color: rgba(110,140,201,0.3);
+  color: #C2D0EE;
+}
+.info-box.success{
+  background: var(--teal-soft);
+  border-color: rgba(61,221,151,0.3);
+  color: #BFF3DC;
+}
+.info-box.warning{
+  background: var(--gold-soft);
+  border-color: rgba(201,162,39,0.35);
+  color: #F0DFA8;
+}
+.info-box.danger{
+  background: var(--red-soft);
+  border-color: rgba(226,87,76,0.3);
+  color: #F5C7C2;
+}
+
+/* =========================================================================
+   STATUS BADGE
+   ========================================================================= */
+
+.status-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.status-badge .dot{
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-badge.qualified{
+  background: var(--teal-soft);
+  color: var(--teal);
+  border-color: rgba(61,221,151,0.3);
+}
+.status-badge.qualified .dot{ background: var(--teal); }
+
+.status-badge.rejected{
+  background: var(--red-soft);
+  color: var(--red);
+  border-color: rgba(226,87,76,0.3);
+}
+.status-badge.rejected .dot{ background: var(--red); }
+
+.status-badge.review{
+  background: var(--gold-soft);
+  color: var(--gold);
+  border-color: rgba(201,162,39,0.3);
+}
+.status-badge.review .dot{ background: var(--gold); }
+
+.status-badge.neutral{
+  background: rgba(139,144,160,0.12);
+  color: var(--text-secondary);
+  border-color: var(--border);
+}
+.status-badge.neutral .dot{ background: var(--text-secondary); }
+
+/* =========================================================================
+   RANK INSIGNIA  — signature element
+   A circular badge marking a candidate's rank, used on the leaderboard
+   table and the candidate inspector header. Gold for top 3, ink for rest.
+   ========================================================================= */
+
+.rank-badge{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.rank-badge.top{
+  background: var(--gold);
+  color: #14171F;
+}
+
+.rank-badge.standard{
+  background: var(--panel-alt);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+/* =========================================================================
+   HERO / HOME
+   ========================================================================= */
+
+.hero-wrap{
+  padding: 1.4rem 0 0.6rem 0;
+}
+
+.hero-title{
+  font-family: var(--font-display);
+  font-size: 2.3rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.hero-sub{
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 620px;
+  line-height: 1.6;
+  margin-bottom: 0.4rem;
+}
+
+.logo-mark{
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+
+/* =========================================================================
+   DATAFRAME / TABLE POLISH
+   ========================================================================= */
+
+[data-testid="stDataFrame"]{
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* =========================================================================
+   CANDIDATE TABLE (custom HTML — shortlisted candidates page)
+   ========================================================================= */
+
+table.candidate-table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  font-family: var(--font-body);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+table.candidate-table thead th{
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  background: var(--panel-alt);
+  padding: 0.65rem 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+table.candidate-table tbody td{
+  padding: 0.6rem 0.8rem;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+table.candidate-table tbody tr:last-child td{
+  border-bottom: none;
+}
+
+table.candidate-table tbody tr:hover{
+  background: var(--panel-alt);
+}
+
+/* progress bars (Score Breakdown) */
+[data-testid="stProgress"] > div > div{
+  background: var(--border) !important;
+}
+[data-testid="stProgress"] > div > div > div{
+  background: var(--gold) !important;
+}
+[data-testid="stProgressBarText"], [data-testid="stProgress"] p{
+  color: var(--text-secondary) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.78rem !important;
+}
+
+/* buttons */
+.stButton button, .stDownloadButton button{
+  font-family: var(--font-body);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.stButton button[kind="primary"]{
+  background: var(--gold);
+  color: #14171F;
+  border: none;
+}
+
+.stButton button[kind="primary"]:hover{
+  opacity: 0.9;
+}
