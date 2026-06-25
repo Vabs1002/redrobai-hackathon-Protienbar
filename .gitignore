@@ -30,4 +30,15 @@ __MACOSX/
 test_candidates.jsonl
 test_submission.csv
 sandbox_candidates.jsonl
+HEAD
 sandbox_submission.csv
+
+sandbox_submission.csv
+
+# Local documentation
+PROJECT_MASTERY.md
+submission_metrics.txt
+
+# Local UI
+ui.py
+main
