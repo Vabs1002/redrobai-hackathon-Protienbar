@@ -3,9 +3,27 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtual Environments
+.venv/
+venv/
+env/
+ui/ui-venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
 # Large files and zip archives
-\[PUB\] India_runs_data_and_ai_challenge.zip
-\[PUB\] India_runs_data_and_ai_challenge/
+[PUB] India_runs_data_and_ai_challenge.zip
+[PUB] India_runs_data_and_ai_challenge/
 __MACOSX/
 
 # Temporary and test candidate datasets
