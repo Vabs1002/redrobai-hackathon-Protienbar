@@ -7,7 +7,7 @@ __pycache__/
 .venv/
 venv/
 env/
-ui/ui-venv/
+ui/.ui-venv/
 
 # Streamlit
 .streamlit/secrets.toml
