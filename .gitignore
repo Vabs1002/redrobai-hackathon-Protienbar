@@ -13,3 +13,6 @@ test_candidates.jsonl
 test_submission.csv
 sandbox_candidates.jsonl
 sandbox_submission.csv
+
+# Local documentation
+PROJECT_MASTERY.md
