@@ -22,8 +22,8 @@ ui/.ui-venv/
 *.log
 
 # Large files and zip archives
-[PUB] India_runs_data_and_ai_challenge.zip
-[PUB] India_runs_data_and_ai_challenge/
+\[PUB\] India_runs_data_and_ai_challenge.zip
+\[PUB\] India_runs_data_and_ai_challenge/
 __MACOSX/
 
 # Temporary and test candidate datasets
