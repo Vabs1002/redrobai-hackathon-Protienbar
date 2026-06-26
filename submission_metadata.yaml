@@ -12,7 +12,7 @@ team_members:
     role: "ML & Backend Engineer"
 
 github_repo: "https://github.com/Vabs1002/redrobai-hackathon-Protienbar"
-sandbox_link: "https://colab.research.google.com/drive/1Gg-t73qbw1prYU_gDiFnXkBgjmwdxjML?usp=sharing"
+sandbox_link: "https://colab.research.google.com/drive/1ONqBGzHlPTDy9GoiJ5GSoKHssW1qyeu0"
 
 reproduce_command: "python rank.py --candidates ./candidates.jsonl --out ./submission.csv"
 
