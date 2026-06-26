@@ -38,7 +38,7 @@ def calculate_fallback_semantic_score(candidate):
             match_count += 1
             
     # Max score of 0.5 for fallback to prevent it outranking verified embedding scores
-    return min((match_count / len(scorers.CORE_SKILLS)) * 0.5, 0.5)
+    return min(match_count / 10.0, 0.5)
 
 def generate_reasoning(candidate, composite_score):
     """
@@ -133,7 +133,7 @@ def main():
                 
                 # Fetch semantic score
                 semantic_score = precomputed_scores.get(cid)
-                if semantic_score is None:
+                if semantic_score is None or semantic_score == 0.0:
                     semantic_score = calculate_fallback_semantic_score(candidate)
                     
                 # Step 3: Composite Formula
