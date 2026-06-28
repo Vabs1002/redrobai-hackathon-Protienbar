@@ -99,7 +99,7 @@ For each of the top 100 candidates, we generate a 1-2 sentence reasoning that re
     similarity_scores.json     -- Pre-computed embedding similarity database (about 2 MB).
     submission.csv             -- Our final validated top-100 ranking.
     submission_metadata.yaml   -- Hackathon metadata descriptor.
-    sandbox_demo.ipynb         -- Google Colab notebook for sandbox reproducibility demo.
+    sandbox_demo.ipynb         -- Google Colab notebook (programmatically blocks network sockets to prove offline execution).
     requirements.txt           -- Dependencies (the ranking step uses only Python standard library).
 
 
@@ -128,5 +128,5 @@ The pre-computation step (generating embeddings) requires torch and sentence-tra
     RAM: 16 GB
     Python: 3.12
     GPU: Not used during ranking
-    Network: Not used during ranking
+    Network: Not used during ranking (programmatically verified offline in sandbox_demo.ipynb)
     Ranking runtime: approximately 3 seconds
