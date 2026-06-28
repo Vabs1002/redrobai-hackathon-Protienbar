@@ -1,4 +1,4 @@
-# Antigravity Candidate Ranker Requirements
+# Protienbar Candidate Ranker Requirements
 # The main ranking script (rank.py) runs on pure Python standard library.
 # Zero external packages are required to run the evaluation step!
 
