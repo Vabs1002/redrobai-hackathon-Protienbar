@@ -164,7 +164,7 @@ def process_candidates(candidates_list):
 if uploaded_file is not None:
     try:
         # Support both JSON array and JSONL format
-        file_content = uploaded_file.getvalue().decode("utf-8")
+        file_content = uploaded_file.getvalue().decode("utf-8-sig")
         if file_content.strip().startswith("["):
             data = json.loads(file_content)
         else:
