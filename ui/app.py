@@ -107,7 +107,7 @@ with col_b:
         # Once Upload page is wired to the backend, this can switch_page
         # directly into pages/1_Upload_Dataset.py. For now this button
         # has no functionality per the prototype scope.
-        st.switch_page("pages/1_📤_Upload_Dataset.py")
+        st.switch_page("pages/upload_dataset.py")
 
 st.markdown(
     '<p style="text-align:center; color:#5C6072; font-size:0.8rem; margin-top:0.6rem;">'
