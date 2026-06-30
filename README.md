@@ -52,6 +52,8 @@ We designed our system with six specific innovations that give it an edge over s
 
 6. Non-Hallucinatory Reasonings: Unlike systems that call LLMs during ranking (which are prone to hallucinating candidate skills and formatting errors), our reasoning engine uses strict metadata extraction to compile highly factual, profile-consistent recruiter sentences.
 
+7. Interactive Recruiting & Analytics Portal: We went beyond the base CLI requirement to build a premium, responsive Streamlit dashboard. It lets recruiters upload datasets, view pool-wide telemetry charts, inspect individual profile scoring details, and download final ranked CSV shortlists.
+
 
 ## The Scoring Pipeline
 
@@ -90,6 +92,20 @@ Any candidate that fails these checks gets their score set to zero, which guaran
 For each of the top 100 candidates, we generate a 1-2 sentence reasoning that references specific facts from their profile -- their current title, years of experience, key skills, career history, and any concerns. We made sure these are not templated or copy-pasted. Each reasoning is unique and reflects what actually makes that particular candidate a good (or decent) fit at their specific rank position.
 
 
+## Interactive Recruiting Portal & Dashboard
+
+To make our Agentic RAG engine usable in a real-world recruiting workflow, we built a fully functional visual web portal using Streamlit. 
+
+### What We Made & What It Shows
+* **Uploader Dashboard:** Upload raw `.jsonl` or `.json` applicant pools (like `sandbox_candidates.jsonl` or `mock_candidates.jsonl`). It automatically scores candidates, blocks honeypots, and displays a categorized, interactive leaderboard.
+* **Pool Telemetry (Analytics):** Visualizes the candidate pool with interactive Plotly charts showing score distributions, years of experience, notice-period slices, career quality bands, geographic concentration, and pipeline funnel stages.
+* **Profile Inspector:** Select any candidate to inspect their profile. It displays their calculated skills, career history, notice-period details, and a clear safety audit indicating if they passed the Honeypot Shield.
+* **Instant Export:** Download the dynamically ranked candidates directly to a standard `shortlisted_candidates.csv` file from the UI.
+
+### How It Works
+The UI imports the exact same backend modular agents (`scorers.py`, `honeypot.py`) that run in the CLI script. When you upload a file, the portal streams the data through these agents, joins the pre-computed embedding similarity dictionary, calculates the composite availability scores, and stores them in the Streamlit session state for cross-page visual analytics.
+
+
 ## Repository Structure
 
     rank.py                    -- The sandbox entrypoint. Produces submission.csv from candidates.jsonl.
@@ -102,6 +118,11 @@ For each of the top 100 candidates, we generate a 1-2 sentence reasoning that re
     sandbox_demo.ipynb         -- Google Colab notebook (programmatically blocks network sockets to prove offline execution).
     requirements.txt           -- Dependencies (the ranking step uses only Python standard library).
     sandbox_candidates.jsonl   -- Small 5-candidate example dataset used in the demo video and Colab run.
+    ui/                        -- Directory containing the Streamlit portal application.
+        app.py                 -- Main Streamlit entrypoint.
+        components/            -- Custom styled UI cards, charts, helpers, metrics, and tables.
+        pages/                 -- Multi-page dashboard layouts (Upload, Dashboard, Shortlist, Inspector, Analytics).
+        utils/                 -- Helper scripts to load candidate profiles and mock data.
 
 
 ## How to Reproduce
@@ -113,8 +134,13 @@ To generate the submission CSV:
     python rank.py --candidates ./candidates.jsonl --out ./submission.csv
 
 To validate the output format:
-
+    
     python validate_submission.py submission.csv
+
+To launch the Interactive Recruiting Portal locally:
+
+    pip install streamlit plotly pandas
+    streamlit run ui/app.py --server.headless=true --browser.gatherUsageStats=false
 
 The pre-computation step (generating embeddings) requires torch and sentence-transformers. This step is already done and the results are included in similarity_scores.json, so you do not need to re-run it to reproduce the submission. If you want to re-run it anyway:
 
