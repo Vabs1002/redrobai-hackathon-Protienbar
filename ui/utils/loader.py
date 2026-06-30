@@ -46,10 +46,21 @@ def _rng(seed: int = 7) -> np.random.Generator:
 
 def generate_dummy_candidates(n: int = 60) -> pd.DataFrame:
     """Build a placeholder dataframe of ranked candidates.
-
-    Columns intentionally mirror what rank.py is expected to eventually
-    output, so swapping in the real backend later is a drop-in change.
+    If top_100_candidates.json exists, loads real ranked candidates.
     """
+    import os
+    import json
+    json_path = os.path.join(os.path.dirname(__file__), "top_100_candidates.json")
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data:
+                    df = pd.DataFrame(data)
+                    return df.head(n)
+        except Exception:
+            pass
+
     rng = _rng(11)
     rows = []
     for i in range(n):
