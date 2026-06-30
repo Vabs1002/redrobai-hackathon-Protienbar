@@ -77,13 +77,18 @@ def chart_card(title: str, subtitle: str, fig: go.Figure) -> None:
 # Dummy data generators
 # ---------------------------------------------------------------------------
 
+from typing import Optional
+
 def _rng(seed: int = 42) -> np.random.Generator:
     return np.random.default_rng(seed)
 
 
-def score_distribution_fig() -> go.Figure:
+def score_distribution_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Histogram of candidate ranking scores (0-100)."""
-    scores = _rng(1).normal(68, 14, 600).clip(0, 100)
+    if df is not None and not df.empty:
+        scores = df["Score"]
+    else:
+        scores = _rng(1).normal(68, 14, 600).clip(0, 100)
     fig = px.histogram(scores, nbins=24, color_discrete_sequence=[GOLD])
     fig.update_traces(marker_line_width=0)
     fig.update_layout(showlegend=False)
@@ -92,9 +97,12 @@ def score_distribution_fig() -> go.Figure:
     return _apply_theme(fig)
 
 
-def experience_distribution_fig() -> go.Figure:
+def experience_distribution_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Distribution of years of experience across candidates."""
-    years = _rng(2).gamma(shape=2.2, scale=2.4, size=600).clip(0, 20)
+    if df is not None and not df.empty:
+        years = df["Experience (yrs)"]
+    else:
+        years = _rng(2).gamma(shape=2.2, scale=2.4, size=600).clip(0, 20)
     fig = px.histogram(years, nbins=20, color_discrete_sequence=[TEAL])
     fig.update_traces(marker_line_width=0)
     fig.update_layout(showlegend=False)
@@ -103,14 +111,20 @@ def experience_distribution_fig() -> go.Figure:
     return _apply_theme(fig)
 
 
-def candidate_locations_fig() -> go.Figure:
+def candidate_locations_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Bar chart of candidate counts by city/region."""
-    cities = ["Bengaluru", "Pune", "Hyderabad", "Delhi NCR", "Mumbai",
-              "Chennai", "Remote", "Other"]
-    counts = _rng(3).integers(40, 260, len(cities))
-    df = pd.DataFrame({"city": cities, "count": counts}).sort_values("count")
-    fig = px.bar(df, x="count", y="city", orientation="h",
-                 color_discrete_sequence=[BLUE])
+    if df is not None and not df.empty:
+        grouped = df.groupby("Location").size().reset_index(name="count")
+        df_plot = grouped.sort_values("count").tail(8)
+        fig = px.bar(df_plot, x="count", y="Location", orientation="h",
+                     color_discrete_sequence=[BLUE])
+    else:
+        cities = ["Bengaluru", "Pune", "Hyderabad", "Delhi NCR", "Mumbai",
+                  "Chennai", "Remote", "Other"]
+        counts = _rng(3).integers(40, 260, len(cities))
+        df_dummy = pd.DataFrame({"city": cities, "count": counts}).sort_values("count")
+        fig = px.bar(df_dummy, x="count", y="city", orientation="h",
+                     color_discrete_sequence=[BLUE])
     fig.update_traces(marker_line_width=0)
     fig.update_layout(showlegend=False)
     fig.update_xaxes(title="Candidates")
@@ -118,10 +132,17 @@ def candidate_locations_fig() -> go.Figure:
     return _apply_theme(fig)
 
 
-def qualification_funnel_fig() -> go.Figure:
+def qualification_funnel_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Funnel: sourced -> screened -> qualified -> shortlisted -> selected."""
     stages = ["Sourced", "Screened", "Qualified", "Shortlisted", "Selected"]
-    values = [1284, 940, 512, 180, 24]
+    if df is not None and not df.empty:
+        total = len(df)
+        qualified = len(df[df["Status"] == "Qualified"])
+        shortlisted = len(df[df["Score"] >= 65.0])
+        selected = len(df[df["Score"] >= 80.0])
+        values = [total, total, qualified, shortlisted, selected]
+    else:
+        values = [1284, 940, 512, 180, 24]
     fig = go.Figure(go.Funnel(
         y=stages,
         x=values,
@@ -132,14 +153,31 @@ def qualification_funnel_fig() -> go.Figure:
     return _apply_theme(fig, height=360)
 
 
-def top_skills_fig() -> go.Figure:
+def top_skills_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Horizontal bar chart of most frequent candidate skills."""
-    skills = ["Python", "SQL", "AWS", "React", "Kubernetes",
-              "Data Modeling", "NLP", "Go", "Terraform", "GraphQL"]
-    counts = sorted(_rng(4).integers(60, 420, len(skills)), reverse=True)
-    df = pd.DataFrame({"skill": skills, "count": counts}).sort_values("count")
-    fig = px.bar(df, x="count", y="skill", orientation="h",
-                 color_discrete_sequence=[GOLD])
+    if df is not None and not df.empty:
+        skills_list = []
+        for raw in df["raw_profile"]:
+            if isinstance(raw, dict):
+                for skill_obj in raw.get("skills", []):
+                    name = skill_obj.get("name")
+                    if name:
+                        skills_list.append(name)
+        if skills_list:
+            counts = pd.Series(skills_list).value_counts().reset_index()
+            counts.columns = ["skill", "count"]
+            df_plot = counts.head(10).sort_values("count")
+        else:
+            df_plot = pd.DataFrame({"skill": [], "count": []})
+        fig = px.bar(df_plot, x="count", y="skill", orientation="h",
+                     color_discrete_sequence=[GOLD])
+    else:
+        skills = ["Python", "SQL", "AWS", "React", "Kubernetes",
+                  "Data Modeling", "NLP", "Go", "Terraform", "GraphQL"]
+        counts = sorted(_rng(4).integers(60, 420, len(skills)), reverse=True)
+        df_dummy = pd.DataFrame({"skill": skills, "count": counts}).sort_values("count")
+        fig = px.bar(df_dummy, x="count", y="skill", orientation="h",
+                     color_discrete_sequence=[GOLD])
     fig.update_traces(marker_line_width=0)
     fig.update_layout(showlegend=False)
     fig.update_xaxes(title="Mentions")
@@ -147,22 +185,45 @@ def top_skills_fig() -> go.Figure:
     return _apply_theme(fig, height=360)
 
 
-def availability_distribution_fig() -> go.Figure:
+def availability_distribution_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Pie/donut of candidate notice-period buckets."""
-    labels = ["Immediate", "15 days", "30 days", "60+ days"]
-    values = [18, 34, 31, 17]
-    fig = px.pie(
-        names=labels, values=values, hole=0.55,
-        color_discrete_sequence=CATEGORICAL_SEQUENCE,
-    )
+    if df is not None and not df.empty:
+        counts = df["Notice Period"].value_counts().reset_index()
+        counts.columns = ["Notice Period", "count"]
+        fig = px.pie(
+            names=counts["Notice Period"], values=counts["count"], hole=0.55,
+            color_discrete_sequence=CATEGORICAL_SEQUENCE,
+        )
+    else:
+        labels = ["Immediate", "15 days", "30 days", "60+ days"]
+        values = [18, 34, 31, 17]
+        fig = px.pie(
+            names=labels, values=values, hole=0.55,
+            color_discrete_sequence=CATEGORICAL_SEQUENCE,
+        )
     fig.update_traces(textfont=dict(color=TEXT), marker=dict(line=dict(color=PANEL, width=2)))
     return _apply_theme(fig, height=320)
 
 
-def career_quality_distribution_fig() -> go.Figure:
+def career_quality_distribution_fig(df: Optional[pd.DataFrame] = None) -> go.Figure:
     """Distribution of a composite 'career quality' signal across bands."""
     bands = ["Exceptional", "Strong", "Moderate", "Weak"]
-    values = [9, 31, 42, 18]
+    if df is not None and not df.empty:
+        bands_list = []
+        for score in df["Score"]:
+            if score >= 80:
+                bands_list.append("Exceptional")
+            elif score >= 65:
+                bands_list.append("Strong")
+            elif score >= 50:
+                bands_list.append("Moderate")
+            else:
+                bands_list.append("Weak")
+        counts = pd.Series(bands_list).value_counts()
+        total = len(df)
+        values = [round((counts.get(b, 0) / total) * 100, 1) for b in bands]
+    else:
+        values = [9, 31, 42, 18]
     fig = px.bar(x=bands, y=values, color=bands,
                  color_discrete_sequence=[GOLD, TEAL, BLUE, RED])
     fig.update_traces(marker_line_width=0)
