@@ -141,3 +141,45 @@ To help recruiters and judges quickly verify the system's logic without processi
 * **Charlie**: A fraudulent "honeypot" profile claiming impossible job durations. The Honeypot Shield immediately flags Charlie, disqualifying him.
 
 We use this file in our **reproduction demo video** to showcase the file upload process, dashboard charts, candidate inspector, and integrity warnings.
+
+### Supported Upload Formats & Schema
+
+The portal's uploader accepts the following file formats for scoring candidate pools:
+1. **JSON Lines (.jsonl)**: A line-delimited JSON file where each line contains exactly one candidate profile object.
+2. **JSON (.json)**: A standard JSON array containing candidate profile objects.
+
+To be processed correctly by our backend engine, each candidate object must adhere to the Redrob profile schema. Below is a complete example of a valid candidate JSON structure:
+
+```json
+{
+  "candidate_id": "CAND_0000001",
+  "profile": {
+    "anonymized_name": "Demo Candidate",
+    "current_title": "AI Engineer",
+    "years_of_experience": 6.5,
+    "location": "Pune",
+    "country": "India"
+  },
+  "career_history": [
+    {
+      "company": "Stripe",
+      "title": "AI Engineer",
+      "start_date": "2023-01-01",
+      "end_date": null,
+      "duration_months": 41,
+      "industry": "Fintech",
+      "description": "Implemented vector search databases."
+    }
+  ],
+  "skills": [
+    {"name": "Python", "proficiency": "expert", "duration_months": 48},
+    {"name": "Pinecone", "proficiency": "advanced", "duration_months": 24}
+  ],
+  "redrob_signals": {
+    "notice_period_days": 30,
+    "recruiter_response_rate": 0.95,
+    "open_to_work_flag": true,
+    "last_active_date": "2026-06-15"
+  }
+}
+```
