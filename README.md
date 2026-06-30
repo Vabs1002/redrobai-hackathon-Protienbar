@@ -102,6 +102,7 @@ For each of the top 100 candidates, we generate a 1-2 sentence reasoning that re
     sandbox_demo.ipynb         -- Google Colab notebook (programmatically blocks network sockets to prove offline execution).
     requirements.txt           -- Dependencies (the ranking step uses only Python standard library).
     sandbox_candidates.jsonl   -- Small 5-candidate example dataset used in the demo video and Colab run.
+    test_candidates.jsonl      -- Larger 100-candidate test dataset representing a realistic diverse applicant pool.
 
 
 ## How to Reproduce
@@ -141,6 +142,15 @@ To help recruiters and judges quickly verify the system's logic without processi
 * **Charlie**: A fraudulent "honeypot" profile claiming impossible job durations. The Honeypot Shield immediately flags Charlie, disqualifying him.
 
 We use this file in our **reproduction demo video** to showcase the file upload process, dashboard charts, candidate inspector, and integrity warnings.
+
+## Test Dataset (test_candidates.jsonl)
+
+To test the system's accuracy and performance on a larger scale, we have included `test_candidates.jsonl`.
+* **Purpose**: This dataset simulates a raw, realistic recruiter queue to prove that the pipeline can successfully filter out non-matching backgrounds and rank qualified applicants on standard CPUs in seconds.
+* **What it has**:
+  * **92 Unrelated Roles**: Contains profiles for Accountants, Civil Engineers, Business Analysts, Support Specialists, and General Developers (React, Java, etc.). These are automatically filtered out (scored 0.0) because they lack core AI/ML credentials.
+  * **8 Qualified AI/ML Engineers**: Surfaced and ranked (e.g. *Ela Singh* with FAISS/Pinecone skills, *Aarav Kapoor* with MLOps/Kubeflow skills).
+  * **Honeypot Profiles**: Includes timeline contradictions to test the **Honeypot Shield's** capability to flag and block integrity-violating profiles.
 
 ### Supported Upload Formats & Schema
 
