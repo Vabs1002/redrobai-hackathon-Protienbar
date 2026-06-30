@@ -101,6 +101,7 @@ For each of the top 100 candidates, we generate a 1-2 sentence reasoning that re
     submission_metadata.yaml   -- Hackathon metadata descriptor.
     sandbox_demo.ipynb         -- Google Colab notebook (programmatically blocks network sockets to prove offline execution).
     requirements.txt           -- Dependencies (the ranking step uses only Python standard library).
+    sandbox_candidates.jsonl   -- Small 5-candidate example dataset used in the demo video and Colab run.
 
 
 ## How to Reproduce
@@ -130,3 +131,13 @@ The pre-computation step (generating embeddings) requires torch and sentence-tra
     GPU: Not used during ranking
     Network: Not used during ranking (programmatically verified offline in sandbox_demo.ipynb)
     Ranking runtime: approximately 3 seconds
+
+## Demo Dataset (sandbox_candidates.jsonl)
+
+To help recruiters and judges quickly verify the system's logic without processing 100,000 files, we have included a small mock candidate file containing 5 distinct developer profiles:
+* **Alice & Ethan**: Highly qualified ML/AI specialists with strong vector search experience.
+* **Bob**: An unrelated frontend engineer (React/Tailwind) to show how the system filters out non-relevant engineering titles.
+* **Diana**: A developer with a background purely in service/consulting firms, demonstrating the career-quality filter.
+* **Charlie**: A fraudulent "honeypot" profile claiming impossible job durations. The Honeypot Shield immediately flags Charlie, disqualifying him.
+
+We use this file in our **reproduction demo video** to showcase the file upload process, dashboard charts, candidate inspector, and integrity warnings.
