@@ -27,6 +27,7 @@ ui/.ui-venv/
 __MACOSX/
 
 # Temporary and test candidate datasets
+test_candidates.jsonl
 test_submission.csv
 HEAD
 sandbox_submission.csv
