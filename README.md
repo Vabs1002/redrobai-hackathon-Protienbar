@@ -104,7 +104,7 @@ For each of the top 100 candidates, we generate a 1-2 sentence reasoning that re
 To make our Agentic RAG engine usable in a real-world recruiting workflow, we built a fully functional visual web portal using Streamlit. 
 
 ### What We Made & What It Shows
-* **Uploader Dashboard:** Upload raw `.jsonl` or `.json` applicant pools (like `sandbox_candidates.jsonl` or `mock_candidates.jsonl`). It automatically scores candidates, blocks honeypots, and displays a categorized, interactive leaderboard.
+* **Uploader Dashboard:** Upload raw `.jsonl` or `.json` applicant pools (like `sandbox_candidates.jsonl`). It automatically scores candidates, blocks honeypots, and displays a categorized, interactive leaderboard.
 * **Pool Telemetry (Analytics):** Visualizes the candidate pool with interactive Plotly charts showing score distributions, years of experience, notice-period slices, career quality bands, geographic concentration, and pipeline funnel stages.
 * **Profile Inspector:** Select any candidate to inspect their profile. It displays their calculated skills, career history, notice-period details, and a clear safety audit indicating if they passed the Honeypot Shield.
 * **Instant Export:** Download the dynamically ranked candidates directly to a standard `shortlisted_candidates.csv` file from the UI.
