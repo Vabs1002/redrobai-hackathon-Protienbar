@@ -23,7 +23,10 @@ section_header(
     subtitle="Ranked candidates from the most recent run, searchable and filterable.",
 )
 
-df = generate_dummy_candidates(n=80)
+if "real_candidates" in st.session_state:
+    df = st.session_state["real_candidates"]
+else:
+    df = generate_dummy_candidates(n=80)
 
 filtered_df = render_search_filter_bar(df)
 

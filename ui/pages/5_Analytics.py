@@ -32,7 +32,12 @@ section_header(
     subtitle="Aggregate signal across the entire candidate pool.",
 )
 
-df = generate_dummy_candidates(n=150)
+if "real_candidates" in st.session_state:
+    df = st.session_state["real_candidates"]
+    is_real = True
+else:
+    df = generate_dummy_candidates(n=150)
+    is_real = False
 
 # ---------------------------------------------------------------------------
 # Summary metrics
@@ -41,8 +46,8 @@ df = generate_dummy_candidates(n=150)
 metric_row([
     {"label": "Candidates Analyzed", "value": f"{len(df):,}", "accent": "blue"},
     {"label": "Unique Locations", "value": f"{df['Location'].nunique()}", "accent": "teal"},
-    {"label": "Median Experience", "value": f"{df['Experience (yrs)'].median():.0f} yrs", "accent": "gold"},
-    {"label": "Median Score", "value": f"{df['Score'].median():.1f}", "accent": "gold"},
+    {"label": "Median Experience", "value": f"{df['Experience (yrs)'].median():.0f} yrs" if len(df) > 0 else "0 yrs", "accent": "gold"},
+    {"label": "Median Score", "value": f"{df['Score'].median():.1f}" if len(df) > 0 else "0.0", "accent": "gold"},
 ])
 
 st.write("")
@@ -54,18 +59,18 @@ divider()
 
 r1c1, r1c2 = st.columns(2)
 with r1c1:
-    chart_card("Top Skills", "Most frequently observed skills across the pool.", top_skills_fig())
+    chart_card("Top Skills", "Most frequently observed skills across the pool.", top_skills_fig(df if is_real else None))
 with r1c2:
-    chart_card("Experience Histogram", "Distribution of years of experience.", experience_distribution_fig())
+    chart_card("Experience Histogram", "Distribution of years of experience.", experience_distribution_fig(df if is_real else None))
 
 r2c1, r2c2 = st.columns(2)
 with r2c1:
-    chart_card("Candidate Locations", "Where candidates are based.", candidate_locations_fig())
+    chart_card("Candidate Locations", "Where candidates are based.", candidate_locations_fig(df if is_real else None))
 with r2c2:
-    chart_card("Availability Distribution", "Notice-period buckets across the pool.", availability_distribution_fig())
+    chart_card("Availability Distribution", "Notice-period buckets across the pool.", availability_distribution_fig(df if is_real else None))
 
 r3c1, r3c2 = st.columns(2)
 with r3c1:
-    chart_card("Career Quality Distribution", "Composite career-trajectory signal, banded.", career_quality_distribution_fig())
+    chart_card("Career Quality Distribution", "Composite career-trajectory signal, banded.", career_quality_distribution_fig(df if is_real else None))
 with r3c2:
-    chart_card("Score Distribution", "Overall ranking score spread.", score_distribution_fig())
+    chart_card("Score Distribution", "Overall ranking score spread.", score_distribution_fig(df if is_real else None))

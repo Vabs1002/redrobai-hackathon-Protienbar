@@ -31,10 +31,16 @@ section_header(
 )
 
 # ---------------------------------------------------------------------------
-# Dummy data
+# Data loading
 # ---------------------------------------------------------------------------
 
-df = generate_dummy_candidates(n=120)
+if "real_candidates" in st.session_state:
+    df = st.session_state["real_candidates"]
+    is_real = True
+else:
+    df = generate_dummy_candidates(n=120)
+    is_real = False
+
 total = len(df)
 qualified = int((df["Status"] == "Qualified").sum())
 rejected = int((df["Status"] == "Rejected").sum())
@@ -48,9 +54,9 @@ top_score = round(df["Score"].max(), 1)
 metric_row([
     {"label": "Total Candidates", "value": f"{total:,}", "accent": "blue"},
     {"label": "Qualified Candidates", "value": f"{qualified:,}",
-     "delta": f"{qualified/total:.0%} of pool", "delta_direction": "up", "accent": "teal"},
+     "delta": f"{qualified/total:.0%} of pool" if total > 0 else "0%", "delta_direction": "up", "accent": "teal"},
     {"label": "Rejected Candidates", "value": f"{rejected:,}",
-     "delta": f"{rejected/total:.0%} of pool", "delta_direction": "down", "accent": "red"},
+     "delta": f"{rejected/total:.0%} of pool" if total > 0 else "0%", "delta_direction": "down", "accent": "red"},
     {"label": "Average Score", "value": f"{avg_score}", "accent": "gold"},
     {"label": "Top Candidate Score", "value": f"{top_score}", "accent": "gold"},
 ])
@@ -67,13 +73,13 @@ with row1_col1:
     chart_card(
         "Score Distribution",
         "Spread of candidate ranking scores across the pool.",
-        score_distribution_fig(),
+        score_distribution_fig(df if is_real else None),
     )
 with row1_col2:
     chart_card(
         "Experience Distribution",
         "Years of professional experience across candidates.",
-        experience_distribution_fig(),
+        experience_distribution_fig(df if is_real else None),
     )
 
 row2_col1, row2_col2 = st.columns(2)
@@ -81,11 +87,11 @@ with row2_col1:
     chart_card(
         "Candidate Locations",
         "Geographic concentration of the candidate pool.",
-        candidate_locations_fig(),
+        candidate_locations_fig(df if is_real else None),
     )
 with row2_col2:
     chart_card(
         "Qualification Funnel",
         "Candidates remaining at each stage of the pipeline.",
-        qualification_funnel_fig(),
+        qualification_funnel_fig(df if is_real else None),
     )

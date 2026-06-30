@@ -28,7 +28,12 @@ section_header(
     subtitle="Inspect a single candidate's profile, scoring, and reasoning in detail.",
 )
 
-df = generate_dummy_candidates(n=80)
+if "real_candidates" in st.session_state:
+    df = st.session_state["real_candidates"]
+    is_real = True
+else:
+    df = generate_dummy_candidates(n=80)
+    is_real = False
 
 selected_name = st.selectbox(
     "Select Candidate",
@@ -37,7 +42,6 @@ selected_name = st.selectbox(
 
 selected_id = selected_name.split("—")[-1].strip()
 candidate = df[df["Candidate ID"] == selected_id].iloc[0]
-seed = int(candidate["Candidate ID"].split("-")[-1])
 
 divider()
 
@@ -79,7 +83,14 @@ with p4:
     st.markdown(f"**Notice Period**  \n{candidate['Notice Period']}")
 
 st.write("")
-skills = generate_dummy_skills(seed)
+
+# Skills
+if is_real:
+    skills = [s.get("name") for s in candidate["raw_profile"].get("skills", [])]
+else:
+    seed = int(candidate["Candidate ID"].split("-")[-1])
+    skills = generate_dummy_skills(seed)
+
 st.markdown("**Skills**")
 skill_chips = " ".join(
     f'<span class="status-badge neutral" style="margin-right:6px;">{s}</span>'
@@ -90,12 +101,27 @@ st.markdown(skill_chips, unsafe_allow_html=True)
 divider()
 
 # ---------------------------------------------------------------------------
-# Career timeline (placeholder)
+# Career timeline
 # ---------------------------------------------------------------------------
 
 section_header("Career Timeline", eyebrow=None)
 
-timeline = generate_dummy_timeline(seed)
+if is_real:
+    timeline = []
+    for job in candidate["raw_profile"].get("career_history", []):
+        start_year = job.get("start_date", "Unknown")[:4]
+        end_date = job.get("end_date")
+        end_year = end_date[:4] if end_date else "Present"
+        timeline.append({
+            "company": job.get("company", "Company"),
+            "title": job.get("title", "Role"),
+            "start_year": start_year,
+            "end_year": end_year
+        })
+else:
+    seed = int(candidate["Candidate ID"].split("-")[-1])
+    timeline = generate_dummy_timeline(seed)
+
 for entry in reversed(timeline):
     st.markdown(
         f"""
@@ -120,7 +146,67 @@ divider()
 
 section_header("Score Breakdown", eyebrow=None)
 
-breakdown = generate_dummy_score_breakdown(seed)
+if is_real:
+    import sys
+    import os
+    import json
+    
+    parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.append(os.path.join(parent_dir, 'backend', 'app'))
+    import scorers
+    import honeypot
+    
+    # Load precomputed scores
+    precomputed_scores = {}
+    precompute_file = os.path.join(parent_dir, 'similarity_scores.json')
+    if os.path.exists(precompute_file):
+        try:
+            with open(precompute_file, 'r', encoding='utf-8') as pf:
+                precomputed_scores = json.load(pf)
+        except Exception:
+            pass
+            
+    cand_raw = candidate["raw_profile"]
+    profile = cand_raw.get("profile", {})
+    history = cand_raw.get("career_history", [])
+    skills_list = cand_raw.get("skills", [])
+    signals = cand_raw.get("redrob_signals", {})
+    cid = cand_raw.get("candidate_id")
+    
+    s_score = scorers.calculate_skills_score(skills_list)
+    c_score = scorers.evaluate_career_quality(history, profile.get("current_title", ""))
+    e_score = scorers.calculate_experience_alignment(profile.get("years_of_experience", 0.0))
+    l_score = scorers.calculate_logistics_score(
+        profile.get("location", ""),
+        profile.get("country", ""),
+        signals.get("notice_period_days", 30)
+    )
+    sem_score = precomputed_scores.get(cid)
+    if sem_score is None or sem_score == 0.0:
+        skills_names = [s.get("name", "").lower().strip() for s in skills_list]
+        hl = profile.get("headline", "").lower()
+        sum_text = profile.get("summary", "").lower()
+        match_count = 0
+        for core_skill in scorers.CORE_SKILLS:
+            if any(core_skill in skill for skill in skills_names) or core_skill in hl or core_skill in sum_text:
+                match_count += 1
+        sem_score = min(match_count / 10.0, 0.5)
+        
+    is_fake = honeypot.is_honeypot_profile(cand_raw)
+    integrity_score = 0 if is_fake else 100
+    
+    breakdown = {
+        "Skill Match": int(s_score * 100),
+        "Semantic Match": int(sem_score * 100),
+        "Experience Fit": int(e_score * 100),
+        "Career Trajectory": int(c_score * 100),
+        "Location Fit": int(l_score * 100),
+        "Integrity / Honeypot": integrity_score
+    }
+else:
+    seed = int(candidate["Candidate ID"].split("-")[-1])
+    breakdown = generate_dummy_score_breakdown(seed)
+
 for label, value in breakdown.items():
     bcol1, bcol2 = st.columns([1, 4])
     with bcol1:
@@ -142,14 +228,20 @@ with col_a:
 
 with col_b:
     section_header("Warnings", eyebrow=None)
-    if candidate["Status"] == "Rejected":
-        info_box("Integrity screen flagged inconsistent role dates. Manual review recommended.",
-                  kind="danger")
-    elif candidate["Status"] == "Needs Review":
-        info_box("Minor skill-claim mismatch detected. Low confidence — review recommended.",
-                  kind="warning")
+    if is_real:
+        if integrity_score == 0:
+            info_box("Integrity screen flagged inconsistent role dates or fake skill proficiencies. Disqualified (Honeypot Shield).", kind="danger")
+        else:
+            info_box("No integrity or honeypot warnings detected for this candidate.", kind="success")
     else:
-        info_box("No integrity or honeypot warnings detected for this candidate.", kind="success")
+        if candidate["Status"] == "Rejected":
+            info_box("Integrity screen flagged inconsistent role dates. Manual review recommended.",
+                      kind="danger")
+        elif candidate["Status"] == "Needs Review":
+            info_box("Minor skill-claim mismatch detected. Low confidence — review recommended.",
+                      kind="warning")
+        else:
+            info_box("No integrity or honeypot warnings detected for this candidate.", kind="success")
 
 divider()
 
