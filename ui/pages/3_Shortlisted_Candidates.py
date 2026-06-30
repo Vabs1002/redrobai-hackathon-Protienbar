@@ -23,10 +23,16 @@ section_header(
     subtitle="Ranked candidates from the most recent run, searchable and filterable.",
 )
 
+from components.cards import info_box
+
 if "real_candidates" in st.session_state:
     df = st.session_state["real_candidates"]
 else:
-    df = generate_dummy_candidates(n=80)
+    info_box(
+        "<strong>No Candidate Pool Loaded</strong><br>Please navigate to the <strong>Upload Dataset</strong> page to upload a candidate JSON/JSONL file and rank them first.",
+        kind="warning"
+    )
+    st.stop()
 
 filtered_df = render_search_filter_bar(df)
 

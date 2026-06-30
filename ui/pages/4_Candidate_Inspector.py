@@ -32,8 +32,11 @@ if "real_candidates" in st.session_state:
     df = st.session_state["real_candidates"]
     is_real = True
 else:
-    df = generate_dummy_candidates(n=80)
-    is_real = False
+    info_box(
+        "<strong>No Candidate Pool Loaded</strong><br>Please navigate to the <strong>Upload Dataset</strong> page to upload a candidate JSON/JSONL file and rank them first.",
+        kind="warning"
+    )
+    st.stop()
 
 selected_name = st.selectbox(
     "Select Candidate",
