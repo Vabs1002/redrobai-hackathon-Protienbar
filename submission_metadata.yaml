@@ -10,6 +10,12 @@ team_members:
   - name: "Vaibhav Mittal"
     email: "dtu.vaibhavmittal@gmail.com"
     role: "ML & Backend Engineer"
+  - name: "Arjav Jain"
+    email: "arjav.dev1106@gmail.com"
+    role: "Frontend & UI Developer"
+  - name: "Navya Medak"
+    email: "scorpus.meow@gmail.com"
+    role: "Product & QA Analyst"
 
 github_repo: "https://github.com/Vabs1002/redrobai-hackathon-Protienbar"
 sandbox_link: "https://colab.research.google.com/github/Vabs1002/redrobai-hackathon-Protienbar/blob/main/sandbox_demo.ipynb"
@@ -38,9 +44,10 @@ ai_usage_summary: |
 methodology_summary: |
   Hybrid RAG candidate ranking pipeline. We pre-compute candidate resume embeddings using the offline-capable 
   all-MiniLM-L6-v2 model and store similarity scores. The ranking script rank.py runs completely offline in 
-  under 5 seconds on CPU. It applies a temporal audit filter (Honeypot Shield) to instantly remove fraudulent 
+  under 3 seconds on CPU. It applies a temporal audit filter (Honeypot Shield) to instantly remove fraudulent 
   profiles, filters unrelated titles, scores skills by duration/endorsements, and applies a platform activity 
-  multiplier to prioritize active, hirable talent.
+  multiplier to prioritize active, hirable talent. We also built an interactive Streamlit recruiting portal 
+  featuring file uploads, Plotly telemetry charts, a profile safety inspector, and instant CSV shortlist exports.
 
 declarations:
   read_submission_spec: true
