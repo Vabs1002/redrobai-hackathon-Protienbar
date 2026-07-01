@@ -2,7 +2,7 @@
 
 Team Protienbar -- Redrob AI Hackathon Submission
 
-> [NOTE]
+> [!NOTE]
 > ###  **Quick Guide for Evaluation & Review**
 > To avoid confusion during review, please note that this repository contains two parallel verification paths:
 > 1. **Official Submission & Sandbox Verification (`rank.py` & `sandbox_demo.ipynb`):** This is the official entry evaluated by the sandbox. It runs completely headless, strictly offline (programmatically blocks network sockets), uses only the Python Standard Library, and finishes ranking all 100,000 candidates in under 3 seconds to produce the official `submission.csv`.
